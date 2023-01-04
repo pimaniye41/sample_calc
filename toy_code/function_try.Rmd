@@ -1,0 +1,13 @@
+#one pop normal dist variance known pop mean z score 
+```{r}
+xbar <- 10
+mu <- 12
+n <- 50
+var <- 9
+zscore <- (xbar-mu)/(sqrt(var))
+zprob <- pnorm(zscore)
+function(xbar, mu, n, pop_var){
+  
+}
+```
+
