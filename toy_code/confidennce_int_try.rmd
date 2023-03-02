@@ -1,0 +1,48 @@
+```{r}
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+
+#code for normal distribution = rnorm(sample size, population mean, population std )
+meanset <- rnorm(30,50000,1000) #= sampled 30 means from 50000 mean population, 1000 std population
+plot(density(meanset$Mean))
+meanset <- as.data.frame(meanset)
+colnames(meanset) <- "Mean"
+meanset
+```
+
+```{r}
+meanset90 <- meanset %>% mutate(upper = Mean + 1677) %>% mutate(lower = Mean - 1677) #=%90a denk gelen interval, std ile hesaplanıyor
+meanset95 <- meanset %>% mutate(upper = Mean + 2010) %>% mutate(lower = Mean - 2010)
+meanset90
+
+Sample <- seq(1,30,1)
+Sample <- as.data.frame(Sample)
+
+ci90 <- cbind(Sample, meanset90)
+ci95 <- cbind(Sample, meanset95)
+```
+
+```{r}
+ci95 <- ci95 %>% mutate(Capture = ifelse(lower < 50000, ifelse(upper > 50000, 1, 0), 0))
+ci90 <- ci90 %>% mutate(Capture = ifelse(lower < 50000, ifelse(upper > 50000, 1, 0), 0))
+
+ci90$Capture <- factor(ci90$Capture, levels = c(0,1))
+ci95$Capture <- factor(ci95$Capture, levels = c(0,1))
+
+ci90
+```
+
+```{r}
+
+colorset = c('0'='red','1'='black')
+
+ci_plot_90 <- ci90 |>
+    ggplot(aes(x = Sample, y = Mean)) + geom_point(aes(color = Capture)) + geom_errorbar(aes(ymin = lower, ymax = upper, color = Capture)) + scale_color_manual(values = colorset) + coord_flip() + geom_hline(yintercept = 50000, linetype = "dashed", color = "blue") + labs(title = "90% Confidence Intervals") + theme(plot.title = element_text(hjust = 0.5)) + ylim(40000,60000)
+
+ci_plot_95 <- ci95 %>% ggplot(aes(x = Sample, y = Mean)) + geom_point(aes(color = Capture)) + geom_errorbar(aes(ymin = lower, ymax = upper, color = Capture)) + scale_color_manual(values = colorset) + coord_flip() + geom_hline(yintercept = 50000, linetype = "dashed", color = "blue") + labs(title = "95% Confidence Intervals") + theme(plot.title = element_text(hjust = 0.5)) + ylim(40000,60000)
+
+
+grid.arrange(ci_plot_90, ci_plot_95, ncol = 2)
+```
+
