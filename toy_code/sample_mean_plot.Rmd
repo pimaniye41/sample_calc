@@ -1,0 +1,42 @@
+A spark plug manufacturer claims that the lives of its plugs are normally distributed with a mean of 60,000 miles and a standard deviation of 4,000 miles. A random sample of 16 plugs had an average life of 58,500 miles. If the manufacturer’s claim is correct, what is the probability of finding a sample mean of 58,500 or less?
+```{r}
+library(tidyverse)
+```
+
+```{r}
+pop_mean <- 60000
+pop_sd <- 4000
+n <-  16
+xbar <- 58500
+se <- pop_sd/sqrt(n)
+```
+
+# pseudo distribution for ploting
+```{r}
+vector <- seq(-3,3,length = 1000) * se + pop_mean
+propv <- dnorm(x = vector,mean = pop_mean,sd = se)
+a <- data.frame(vector, propv)
+```
+
+
+```{r}
+ggplot(a)+
+  geom_line(aes(x = vector, y = propv))+
+  geom_segment(aes(x = xbar, 
+                   y = 0, 
+                   xend = xbar,
+                   yend = dnorm(x = xbar,mean = pop_mean,sd = se),
+                   color = "xbar"))+
+  scale_x_continuous(breaks = c(seq(vector[1], vector[1000], by = se),xbar))+
+  annotate("rect", xmin = vector[1], xmax = xbar, ymin = 0, ymax = dnorm(x = xbar,mean = pop_mean,sd = se),
+        alpha = .2)+
+  theme_bw()
+
+#geom_polygon(data = propv, aes(x=x, y=y, fill="red"))
+```
+
+
+```{r}
+pnorm((xbar-pop_mean)/(pop_sd/sqrt(n)))
+```
+
